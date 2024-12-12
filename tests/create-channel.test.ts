@@ -1,9 +1,22 @@
 import axios, { AxiosResponse } from 'axios';
 
 const baseUrl: string = 'https://api-sb11.rpc.ziichat.dev';
-const headers = {
-  'x-session-token': '1CUqcWMVbBI-xEOU22vNJzbohpBJSfU4hM9erNcI0acx5siOiTh_mkUUa1dNa4feXy8Ov-G2HefjkPLNK0QiQw',
-};
+
+let headers: { 'x-session-token': string };
+
+const prefix = "create-channel-http-api-test";
+beforeAll(async () => {
+  const response = await axios.post(`${baseUrl}/InternalFaker/MockUsers`, {
+    prefix: prefix,
+    quantity: 1,
+    badge: 0,
+  });
+  
+  const token = response.data.data[0].token;
+  headers = {
+    'x-session-token': token,
+  };
+});
 
 describe('Create Channel HTTP Api', () => {
   const createChannelUrl: string = `${baseUrl}/Channel/createChannel`;
@@ -291,4 +304,8 @@ describe('Create Channel HTTP Api', () => {
       expect(res.data.data).toHaveProperty('channelMetadata');
     });
   });
+});
+
+afterAll(async () => {
+  await axios.delete(`${baseUrl}/InternalFaker/DeleteMockedUsers?prefix=${prefix}`);
 });
